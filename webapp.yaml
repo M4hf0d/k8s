@@ -1,51 +1,55 @@
+# This file defines a Kubernetes Deployment and Service for a web application.
+
+# The Deployment manages the deployment of the web application.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webapp-deployment
+  name: webapp-deployment # Name of the deployment
   labels:
-    app: webapp
+    app: webapp # Label to identify the deployment
 spec:
-  replicas: 1
+  replicas: 1 # Number of pod replicas to run
   selector:
     matchLabels:
-      app: webapp
+      app: webapp # Selector to match the pods with the label 'app: webapp'
   template:
     metadata:
       labels:
-        app: webapp
+        app: webapp # Label for the pods created by this deployment
     spec:
       containers:
-      - name: webapp
-        image: nanajanashia/k8s-demo-app:v1.0
-        ports:
-        - containerPort: 3000
-        env:
-        - name: USER_NAME
-          valueFrom:
-            secretKeyRef:
-              name: mongo-secret
-              key: mongo-user
-        - name: USER_PWD
-          valueFrom:
-            secretKeyRef:
-              name: mongo-secret
-              key: mongo-password 
-        - name: DB_URL
-          valueFrom:
-            configMapKeyRef:
-              name: mongo-config
-              key: mongo-url
+        - name: webapp # Name of the container
+          image: nanajanashia/k8s-demo-app:v1.0 # Docker image to use for the container
+          ports:
+            - containerPort: 3000 # Port that the container listens on
+          env:
+            - name: USER_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret # Reference to a Kubernetes Secret for the MongoDB username
+                  key: mongo-user
+            - name: USER_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret # Reference to a Kubernetes Secret for the MongoDB password
+                  key: mongo-password
+            - name: DB_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: mongo-config # Reference to a Kubernetes ConfigMap for the MongoDB URL
+                  key: mongo-url
 ---
+# The Service exposes the web application to the outside world.
 apiVersion: v1
 kind: Service
 metadata:
-  name: webapp-service
+  name: webapp-service # Name of the service
 spec:
-  type: NodePort
+  type: NodePort # Type of service, NodePort exposes the service on a static port on each node
   selector:
-    app: webapp
+    app: webapp # Selector to match the pods with the label 'app: webapp'
   ports:
-    - protocol: TCP
-      port: 3000
-      targetPort: 3000
-      nodePort: 30100
+    - protocol: TCP # Protocol used by the service
+      port: 3000 # Port on which the service is exposed
+      targetPort: 3000 # Port on which the application is running inside the container
+      nodePort: 30100 # Static port on each node to expose the service

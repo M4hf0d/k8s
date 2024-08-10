@@ -1,44 +1,48 @@
+# This file defines a Kubernetes Deployment and Service for a MongoDB instance.
+
+# The Deployment manages the deployment of the MongoDB instance.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mongo-deployment
+  name: mongo-deployment # Name of the deployment
   labels:
-    app: mongo
+    app: mongo # Label to identify the deployment
 spec:
-  replicas: 1
+  replicas: 1 # Number of pod replicas to run
   selector:
     matchLabels:
-      app: mongo
+      app: mongo # Selector to match the pods with the label 'app: mongo'
   template:
     metadata:
       labels:
-        app: mongo
+        app: mongo # Label for the pods created by this deployment
     spec:
       containers:
-      - name: mongodb
-        image: mongo:5.0
-        ports:
-        - containerPort: 27017
-        env:
-        - name: MONGO_INITDB_ROOT_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: mongo-secret
-              key: mongo-user
-        - name: MONGO_INITDB_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mongo-secret
-              key: mongo-password  
+        - name: mongodb # Name of the container
+          image: mongo:5.0 # Docker image to use for the container
+          ports:
+            - containerPort: 27017 # Port that the container listens on
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret # Reference to a Kubernetes Secret for the MongoDB root username
+                  key: mongo-user
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret # Reference to a Kubernetes Secret for the MongoDB root password
+                  key: mongo-password
 ---
+# The Service exposes the MongoDB instance to other services within the cluster.
 apiVersion: v1
 kind: Service
 metadata:
-  name: mongo-service
+  name: mongo-service # Name of the service
 spec:
   selector:
-    app: mongo
+    app: mongo # Selector to match the pods with the label 'app: mongo'
   ports:
-    - protocol: TCP
-      port: 27017
-      targetPort: 27017
+    - protocol: TCP # Protocol used by the service
+      port: 27017 # Port on which the service is exposed
+      targetPort: 27017 # Port on which the MongoDB instance is running inside the container
